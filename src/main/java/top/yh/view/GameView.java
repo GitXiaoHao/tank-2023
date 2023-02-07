@@ -2,6 +2,7 @@ package top.yh.view;
 
 import lombok.Getter;
 import top.yh.PropertiesName;
+import top.yh.database.utils.JdbcByDruid;
 import top.yh.listen.GameListen;
 import top.yh.resources.AbstractTankData;
 import top.yh.resources.AbstractViewData;
@@ -25,18 +26,18 @@ public class GameView extends JFrame implements PropertyChangeListener {
     /**
      * 菜单界面
      */
-    private static GameView.MenuView menuView;
+    private static final GameView.MenuView MENU_VIEW;
     /**
      * 游戏的监听对象
      */
-    private static GameListen gameListen;
+    private static final GameListen GAME_LISTEN;
 
     static {
         // TODO 必须这样放
         //游戏监听对象
-        gameListen = new GameListen();
+        GAME_LISTEN = new GameListen();
         //菜单面板
-        menuView = new MenuView();
+        MENU_VIEW = new MenuView();
     }
 
     /**
@@ -45,8 +46,10 @@ public class GameView extends JFrame implements PropertyChangeListener {
     private final GameDataAbstract viewData;
 
     public GameView() throws HeadlessException {
+        //关闭连接
+        JdbcByDruid.close();
         //游戏窗体的文件路径
-        String filePath = PropertiesName.GAME_VIEW_PATH;
+        final String filePath = PropertiesName.GAME_VIEW_PATH;
         //初始化界面数据对象
         viewData = new GameDataAbstract(filePath);
         //加入其他数据
@@ -58,19 +61,19 @@ public class GameView extends JFrame implements PropertyChangeListener {
         //加入游戏面板
         this.getContentPane().add(viewData.addBackImage(viewData.getJpanel()));
         //鼠标监听
-        this.addMouseListener(gameListen.addGameFrameMouseListen());
+        this.addMouseListener(GAME_LISTEN.addGameFrameMouseListen());
         //键盘监听
-        this.addKeyListener(gameListen.addGameFrameKeyListen());
+        this.addKeyListener(GAME_LISTEN.addGameFrameKeyListen());
         //初始化
-        gameListen.notStartInitData();
+        GAME_LISTEN.notStartInitData();
         //加入 PropertyChangeSupport
         GameCommonData.someListenValue.addPropertyChangeListener(this);
         //将菜单窗体可视化
-        menuView.setVisible(true);
+        MENU_VIEW.setVisible(true);
         //游戏窗体可视化
         this.setVisible(true);
         //加入游戏窗体重绘的定时器
-        gameListen.addTimerForGameViewRepaint(viewData.getFlushMinus());
+        GAME_LISTEN.addTimerForGameViewRepaint(viewData.getFlushMinus());
     }
 
 
@@ -90,13 +93,13 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 //未开始
                 graphics.drawImage(viewData.getBackGroundImage().getImage(), 0, 0, viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
                 //停止重绘
-                gameListen.stopTimerForGameViewRepaint(Condition.NotStarted);
+                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.NotStarted);
                 break;
             case Begin:
                 //开始重绘
-                gameListen.addTimerForGameViewRepaint(viewData.getFlushMinus());
+                GAME_LISTEN.addTimerForGameViewRepaint(viewData.getFlushMinus());
                 //计时器一直刷
-                gameListen.addTimerForFlushEnemyTank();
+                GAME_LISTEN.addTimerForFlushEnemyTank();
                 //丢掉
                 GameCommonData.superList.removeAll(GameCommonData.uselessList);
                 GameCommonData.uselessList.clear();
@@ -112,18 +115,18 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 //失败
                 graphics.drawImage(viewData.failBackGroundImage, 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
-                gameListen.stopTimerForGameViewRepaint(Condition.Fail);
+                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Fail);
 
                 break;
             case Win:
                 //胜利
                 graphics.drawImage(viewData.winBackGroundImage, 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
-                gameListen.stopTimerForGameViewRepaint(Condition.Win);
+                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Win);
                 break;
             case Pause:
                 //暂停
-                gameListen.stopTimerForGameViewRepaint(Condition.Pause);
+                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Pause);
                 break;
             default:
                 break;
@@ -149,9 +152,9 @@ public class GameView extends JFrame implements PropertyChangeListener {
             //先打印
             System.out.println(evtPropertyName + " 新数据 " + newValue + " 旧数据 " + oldValue);
             //看看是否已经到达要求停止刷新敌方坦克
-            gameListen.stopFlushEnemyTank((int) newValue);
+            GAME_LISTEN.stopFlushEnemyTank((int) newValue);
             //改变菜单面板的数据
-            menuView.changeLabel(newValue);
+            MENU_VIEW.changeLabel(newValue);
         }
 
     }
@@ -211,7 +214,7 @@ public class GameView extends JFrame implements PropertyChangeListener {
         }
 
         private static class MenuDataAbstract extends AbstractViewData {
-            private static int size = 0;
+            private int size = 0;
             private int menuWindowX;
             private int menuWindowY;
             private int buttonX;
@@ -249,8 +252,8 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 initButton(againButton);
                 initButton(exitButton);
                 //添加监听器
-                exitButton.addActionListener(gameListen.addExitButtonListen(exitButton));
-                stopOrBeginButton.addActionListener(gameListen.addStopOrBeginButtonListen(stopOrBeginButton));
+                exitButton.addActionListener(GAME_LISTEN.addExitButtonListen(exitButton));
+                stopOrBeginButton.addActionListener(GAME_LISTEN.addStopOrBeginButtonListen(stopOrBeginButton));
                 panel.add(backButton);
                 panel.add(stopOrBeginButton);
                 addLabel(panel);
