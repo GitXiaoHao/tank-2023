@@ -1,7 +1,7 @@
 package top.yh.listen;
 
 import lombok.AllArgsConstructor;
-import top.yh.resourse.ViewCommonData;
+import top.yh.resources.ViewCommonData;
 import top.yh.view.GameView;
 import top.yh.view.LoginOrRegisterView;
 
@@ -15,11 +15,20 @@ import java.util.Map;
  * @date 2023/2/3
  * 监听器
  **/
-public class Listen {
-    public static LoginOrRegisterByInformationErrorListen loginErrorListen;
-    public static LoginOrRegisterByInformationErrorListen registerErrorListen;
+public class ViewListen {
+    private LoginOrRegisterByInformationErrorListen loginErrorListen;
+    private LoginOrRegisterByInformationErrorListen registerErrorListen;
+    private LoginListenByLogin loginListenByLogin;
+    private LoginListenByRegisterOrRegisterListenByBack registerListenByBack;
+    private LoginListenByRegisterOrRegisterListenByBack loginListenByRegister;
+    private RegisterListenByRegister registerListenByRegister;
 
-    private static boolean visitedDatabase() {
+    public void loginAndRegisterError(Map<JTextField, JLabel> map, JTextField userField, JTextField passwordField) {
+        loginErrorListen = new LoginOrRegisterByInformationErrorListen(map, userField, passwordField);
+        registerErrorListen = new LoginOrRegisterByInformationErrorListen(map, userField, passwordField);
+    }
+
+    private boolean visitedDatabase() {
         String user;
         String password;
         if (ViewCommonData.nowState) {
@@ -34,37 +43,67 @@ public class Listen {
         return true;
     }
 
+    public LoginListenByRegisterOrRegisterListenByBack getRegisterListenByBack(JLabel back) {
+        if (registerListenByBack == null) {
+            registerListenByBack = new LoginListenByRegisterOrRegisterListenByBack(back);
+        }
+        return registerListenByBack;
+    }
+
+    public LoginListenByRegisterOrRegisterListenByBack getLoginListenByRegister(JLabel register) {
+        if (loginListenByRegister == null) {
+            loginListenByRegister = new LoginListenByRegisterOrRegisterListenByBack(register);
+        }
+        return loginListenByRegister;
+    }
+
+    public LoginListenByLogin getLoginListenByLogin() {
+        if (loginListenByLogin == null) {
+            loginListenByLogin = new LoginListenByLogin();
+        }
+        return loginListenByLogin;
+    }
+
+    public RegisterListenByRegister getRegisterListenByRegister() {
+        if (registerListenByRegister == null) {
+            registerListenByRegister = new RegisterListenByRegister();
+        }
+        return registerListenByRegister;
+    }
+
     /**
      * 登录页面的注册按钮
      * 注册页面的返回按钮
      */
     @AllArgsConstructor
-    public static class LoginListenByRegisterOrRegisterListenByBack extends MouseAdapter {
+    private static class LoginListenByRegisterOrRegisterListenByBack extends MouseAdapter {
         private JLabel label;
-        /**
-         * 判断是注册还是返回
-         * 如果是注册标签就为true
-         * 如果是返回标签就为false
-         */
-        private boolean registerOrBack;
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(registerOrBack) {
+            //登录页面换为注册 注册页面换为登录
+            if (ViewCommonData.nowState) {
+                //当前页面是登录
                 //将当前窗体设为隐藏
                 ViewCommonData.loginWindow.setVisible(false);
                 ViewCommonData.loginSuccess = false;
                 //展示注册窗体
-                if(ViewCommonData.registerWindow == null) {
+                if (ViewCommonData.registerWindow == null) {
                     ViewCommonData.registerWindow = new LoginOrRegisterView(ViewCommonData.register);
-                }else{
+                } else {
                     ViewCommonData.registerWindow.setVisible(true);
                 }
-            }else {
+                //将当前状态换为注册
+                ViewCommonData.nowState = false;
+            } else {
+                //当前是注册页面
                 //注册界面隐藏
                 ViewCommonData.registerWindow.setVisible(false);
                 //登录界面出现
                 ViewCommonData.loginWindow.setVisible(true);
+                ViewCommonData.loginSuccess = true;
+                //将当前状态换为登录
+                ViewCommonData.nowState = true;
             }
         }
 
@@ -82,43 +121,9 @@ public class Listen {
     }
 
     /**
-     * 登录界面的登录按钮
-     */
-    public static class LoginListenByLogin extends KeyAdapter implements ActionListener {
-        private synchronized void login() {
-            if (ViewCommonData.loginSuccess) {
-                //如果通过校验
-                if (visitedDatabase()) {
-                    ViewCommonData.loginWindow.setVisible(false);
-                    ViewCommonData.loginSuccess = false;
-                    if(ViewCommonData.gameView == null) {
-                        ViewCommonData.gameView = new GameView();
-                    }else{
-                        ViewCommonData.gameView.setVisible(true);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                //实现与登陆按钮同样的方法
-                login();
-            }
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            //登录按钮
-            login();
-        }
-    }
-
-    /**
      * 登录和注册界面的提示信息
      */
-    public static class LoginOrRegisterByInformationErrorListen {
+    private static class LoginOrRegisterByInformationErrorListen {
         private final JTextField userField;
         private final JTextField passwordField;
         private final Map<JTextField, JLabel> map;
@@ -185,7 +190,41 @@ public class Listen {
         }
     }
 
-    public static class RegisterListenByRegister extends KeyAdapter implements ActionListener {
+    /**
+     * 登录界面的登录按钮
+     */
+    private class LoginListenByLogin extends KeyAdapter implements ActionListener {
+        private synchronized void login() {
+            if (ViewCommonData.loginSuccess) {
+                //如果通过校验
+                if (visitedDatabase()) {
+                    ViewCommonData.loginWindow.setVisible(false);
+                    ViewCommonData.loginSuccess = false;
+                    if (ViewCommonData.gameView == null) {
+                        ViewCommonData.gameView = new GameView();
+                    } else {
+                        ViewCommonData.gameView.setVisible(true);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                //实现与登陆按钮同样的方法
+                login();
+            }
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            //登录按钮
+            login();
+        }
+    }
+
+    private class RegisterListenByRegister extends KeyAdapter implements ActionListener {
         private synchronized void register() {
             //判断是不是注册
             if (!ViewCommonData.nowState) {

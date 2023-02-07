@@ -80,8 +80,18 @@ public class GetProperties {
      */
     private static boolean isHaveProperty(String filePath) {
         //查看是否有这个文件
-
         //如果有 则不等于null 如果没有 就返回null
         return PROPERTY_DATA_MAP.get(filePath) != null;
+    }
+
+    /**
+     * 获取具体的值
+     * @param filePath 文件名
+     * @param key 存放数据的key
+     * @return 返回value
+     */
+    public static String getSpecificData(String filePath,String key){
+        Map<String, String> map = getAllProperties(filePath);
+        return Optional.of(map.get(key)).orElse("100");
     }
 }

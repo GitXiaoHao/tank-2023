@@ -1,4 +1,4 @@
-package top.yh.resourse;
+package top.yh.resources;
 
 import top.yh.music.MusicPlay;
 import top.yh.view.FirstView;
@@ -49,8 +49,5 @@ public class ViewCommonData {
      * 游戏界面
      */
     public static GameView gameView;
-    /**
-     * 菜单界面
-     */
-    public static GameView.MenuView menuView;
+
 }

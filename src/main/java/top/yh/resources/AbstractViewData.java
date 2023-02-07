@@ -1,7 +1,7 @@
-package top.yh.resourse;
+package top.yh.resources;
 
 import lombok.Getter;
-import top.yh.listen.Listen;
+import top.yh.listen.ViewListen;
 import top.yh.utils.GetImage;
 import top.yh.utils.GetProperties;
 
@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2023/2/2
  **/
 @Getter
-public abstract class ViewData {
+public abstract class AbstractViewData {
 
     private final String filePath;
     /**
@@ -37,13 +37,21 @@ public abstract class ViewData {
     /**
      * 窗口标题
      */
-
     private String windowsTitle;
+    /**
+     * 存放视图数据的map
+     * key是数据名
+     * value是数据
+     */
     private Map<String, String> viewDataMap;
 
-
-    public ViewData(String filePath) {
+    /**
+     * 构造方法
+     * @param filePath 读取的文件
+     */
+    public AbstractViewData(String filePath) {
         this.filePath = filePath;
+        //先初始化共有数据
         initData();
     }
 
@@ -84,7 +92,6 @@ public abstract class ViewData {
      * 初始化JFrame
      *
      * @param jFrame 窗体
-     * @return 返回初始化过的窗体
      */
     public void initFrame(JFrame jFrame) {
         //设置标题
@@ -99,11 +106,11 @@ public abstract class ViewData {
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //窗口图标
         jFrame.setIconImage(getLoginWindowsImage());
-
     }
 
 
-    public JPanel initLoginOrRegisterJpanel(JPanel panel, String mode) {
+    public JPanel initLoginOrRegisterJpanel(JPanel panel) {
+        ViewListen viewListen = new ViewListen();
         RegisterOrLoginMeasure measure = new RegisterOrLoginMeasure();
         //用户名
         JLabel user = new JLabel(measure.USER);
@@ -212,19 +219,16 @@ public abstract class ViewData {
                     measure.loginButtonHeight);
             //监听器
             //注册标签增加鼠标监听器
-            register.addMouseListener(new Listen.LoginListenByRegisterOrRegisterListenByBack(register,true));
+            register.addMouseListener(viewListen.getLoginListenByRegister(register));
             //登录按钮
-            Listen.LoginListenByLogin byLogin = new Listen.LoginListenByLogin();
             //按钮监听
-            login.addActionListener(byLogin);
+            login.addActionListener(viewListen.getLoginListenByLogin());
             //键盘监听
-            login.addKeyListener(byLogin);
+            login.addKeyListener(viewListen.getLoginListenByLogin());
             //注册标签
             panel.add(register);
             //登录按钮
             panel.add(login);
-            //用户名和密码的提示信息
-            Listen.loginErrorListen = new Listen.LoginOrRegisterByInformationErrorListen(map,userField,passwordField);
         } else {
             //如果是注册界面
             //注册按钮
@@ -243,17 +247,15 @@ public abstract class ViewData {
             //注册标签
             register.setForeground(measure.COLOR);
             //监听器
-            back.addMouseListener(new Listen.LoginListenByRegisterOrRegisterListenByBack(back,false));
+            back.addMouseListener(viewListen.getRegisterListenByBack(back));
             //给注册按钮添加监听器
-            Listen.RegisterListenByRegister byRegister = new Listen.RegisterListenByRegister();
-            register.addActionListener(byRegister);
-            register.addKeyListener(byRegister);
+            register.addActionListener(viewListen.getRegisterListenByRegister());
+            register.addKeyListener(viewListen.getRegisterListenByRegister());
             //注册标签
             panel.add(register);
             panel.add(back);
-            //用户名和密码的提示信息
-            Listen.registerErrorListen = new Listen.LoginOrRegisterByInformationErrorListen(map,userField,passwordField);
         }
+        viewListen.loginAndRegisterError(map,userField,passwordField);
         return panel;
     }
 
@@ -270,10 +272,6 @@ public abstract class ViewData {
         panel.add(label);
         return panel;
     }
-    public JPanel addMenuJpanel(JPanel panel){
-
-        return panel;
-    }
     /**
      * 登录和注册的尺寸
      */
@@ -281,108 +279,107 @@ public abstract class ViewData {
         /**
          * 登录界面 用户名位置
          */
-        public final int loginUserX = 100;
-        public final int loginUserY = 100;
+        private final int loginUserX = 100;
+        private final int loginUserY = 100;
         /**
          * 登录界面 密码位置
          */
-        public final int loginPasswordX = loginUserX;
-        public final int loginPasswordY = loginUserY + 43;
+        private final int loginPasswordX = loginUserX;
+        private final int loginPasswordY = loginUserY + 43;
         /**
          * 用户名输入框位置
          */
-        public final int loginUserFieldX = 150;
-        public final int loginUserFieldY = 115;
+        private final int loginUserFieldX = 150;
+        private final int loginUserFieldY = 115;
         /**
          * 密码输入框位置
          */
-        public final int loginPasswordFieldX = loginUserFieldX;
-        public final int loginPasswordFieldY = loginUserFieldY + 40;
+        private final int loginPasswordFieldX = loginUserFieldX;
+        private final int loginPasswordFieldY = loginUserFieldY + 40;
         /**
          * 登录按钮位置
          */
-        public final int loginButtonX = 200;
-        public final int loginButtonY = 250;
+        private final int loginButtonX = 200;
+        private final int loginButtonY = 250;
         /**
          * 注册标签位置
          */
-        public final int registerX = 165;
-        public final int registerY = 300;
+        private final int registerX = 165;
+        private final int registerY = 300;
         /**
          * 返回标签位置
          */
-        public final int BACK_X = 210;
-        public final int BACK_Y = registerY;
+        private final int BACK_X = 210;
+        private final int BACK_Y = registerY;
         /**
          * 登录界面 用户名大小
          */
-        public final int loginUserWidth = 100;
-        public final int loginUserHeight = 50;
+        private final int loginUserWidth = 100;
+        private final int loginUserHeight = 50;
         /**
          * 登录界面 密码大小
          */
-        public final int loginPasswordWidth = loginUserWidth;
-        public final int loginPasswordHeight = loginUserHeight;
+        private final int loginPasswordWidth = loginUserWidth;
+        private final int loginPasswordHeight = loginUserHeight;
         /**
          * 登录界面输入框大小
          */
-        public final int loginUserFieldWidth = 200;
-        public final int loginUserFieldHeight = 25;
-        public final int loginPasswordFieldWidth = loginUserFieldWidth;
-        public final int loginPasswordFieldHeight = 25;
+        private final int loginUserFieldWidth = 200;
+        private final int loginUserFieldHeight = 25;
+        private final int loginPasswordFieldWidth = loginUserFieldWidth;
+        private final int loginPasswordFieldHeight = 25;
         /**
          * 登录按钮大小
          */
-        public final int loginButtonWidth = 60;
-        public final int loginButtonHeight = 20;
+        private final int loginButtonWidth = 60;
+        private final int loginButtonHeight = 20;
         /**
          * 注册标签大小
          */
-        public final int registerWidth = 200;
-        public final int registerHeight = 20;
+        private final int registerWidth = 200;
+        private final int registerHeight = 20;
         /**
          * 返回标签大小
          */
-        public final int backWidth = 200;
-        public final int backHeight = 40;
+        private final int backWidth = 200;
+        private final int backHeight = 40;
         /**
          * 输入框指定列数
          */
-        public final int inputFieldSize = 20;
+        private final int inputFieldSize = 20;
         /**
          * 用户名
          */
-        public final String USER = "用户名";
+        private final String USER = "用户名";
         /**
          * 密码
          */
-        public final String PASSWORD = "密码";
+        private final String PASSWORD = "密码";
         /**
          * 登录按钮
          */
-        public final String LOGIN = "登录";
+        private final String LOGIN = "登录";
         /**
          * 注册标签
          */
-        public final String NOT_REGISTER = "没有账号，立即注册";
-        public final Font FONT = new Font("微软雅黑", Font.BOLD, 15);
+        private final String NOT_REGISTER = "没有账号，立即注册";
+        private final Font FONT = new Font("微软雅黑", Font.BOLD, 15);
         /**
          * 注册标签字体
          */
-        public final Font REGISTER_FONT = new Font("楷体", Font.BOLD, 15);
+        private final Font REGISTER_FONT = new Font("楷体", Font.BOLD, 15);
         /**
          * 返回标签字体
          */
-        public final Font BACK_FONT = new Font("楷体", Font.BOLD, 20);
+        private final Font BACK_FONT = new Font("楷体", Font.BOLD, 20);
         /**
          * 字体颜色
          */
-        public final Color COLOR = Color.BLACK;
+        private final Color COLOR = Color.BLACK;
         /**
          * 返回标签
          */
-        public final String RETURN = "返回";
-        public final String REGISTER = "注册";
+        private final String RETURN = "返回";
+        private final String REGISTER = "注册";
     }
-
 }

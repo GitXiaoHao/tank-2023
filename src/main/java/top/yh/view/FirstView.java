@@ -1,8 +1,9 @@
 package top.yh.view;
 
+import top.yh.PropertiesName;
 import top.yh.music.MusicPlay;
-import top.yh.resourse.ViewCommonData;
-import top.yh.resourse.ViewData;
+import top.yh.resources.ViewCommonData;
+import top.yh.resources.AbstractViewData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +31,8 @@ public class FirstView extends JFrame {
         /*
          * 读取的数据文件
          */
-        String filePath = "../view/first-view-data.properties";
-        final ViewData firstData = new FirstData(filePath);
+        String filePath = PropertiesName.FIRST_VIEW_PATH;
+        final AbstractViewData firstData = new FirstDataAbstract(filePath);
         //初始化面板
         firstData.initFrame(this);
         //添加窗体
@@ -58,9 +59,9 @@ public class FirstView extends JFrame {
     /**
      * 第一个视图的数据
      */
-    private static class FirstData extends ViewData{
+    private static class FirstDataAbstract extends AbstractViewData {
 
-        public FirstData(String filePath) {
+        public FirstDataAbstract(String filePath) {
             super(filePath);
         }
 

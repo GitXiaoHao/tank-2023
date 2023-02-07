@@ -4,6 +4,9 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * @author yuhao
+ */
 public class MusicPlay extends Thread {
     public int flag = 1;
     SourceDataLine dataLine = null;
