@@ -1,6 +1,5 @@
 package top.yh.listen;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import top.yh.resources.GameCommonData;
 
@@ -12,13 +11,18 @@ import java.beans.PropertyChangeSupport;
  * @date 2023/2/4
  * 监听一些数据的改变
  **/
-@AllArgsConstructor
+
 public class SomeListenValue {
     /**
      * 共击败了多少坦克
      */
     @Getter
     private Integer killNumber;
+
+    public SomeListenValue(Integer killNumber) {
+        this.killNumber = killNumber;
+    }
+
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 

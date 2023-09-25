@@ -16,7 +16,7 @@ import java.util.Map;
  * @date 2023/2/3
  * 监听器
  **/
-public class ViewListen {
+public class AccountListen {
     private LoginOrRegisterByInformationErrorListen loginErrorListen;
     private LoginOrRegisterByInformationErrorListen registerErrorListen;
     private LoginListenByLogin loginListenByLogin;
@@ -30,6 +30,11 @@ public class ViewListen {
         registerErrorListen = new LoginOrRegisterByInformationErrorListen(map, userField, passwordField);
     }
 
+    /**
+     * 校验
+     *
+     * @return
+     */
     private boolean visitedDatabase() {
         String user;
         String password;
@@ -95,9 +100,12 @@ public class ViewListen {
      * 登录页面的注册按钮
      * 注册页面的返回按钮
      */
-    @AllArgsConstructor
     private static class LoginListenByRegisterOrRegisterListenByBack extends MouseAdapter {
-        private JLabel label;
+        private final JLabel label;
+
+        public LoginListenByRegisterOrRegisterListenByBack(JLabel label) {
+            this.label = label;
+        }
 
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -113,8 +121,6 @@ public class ViewListen {
                 } else {
                     ViewCommonData.registerWindow.setVisible(true);
                 }
-                //将当前状态换为注册
-                ViewCommonData.nowState = false;
             } else {
                 //当前是注册页面
                 //注册界面隐藏
@@ -122,9 +128,8 @@ public class ViewListen {
                 //登录界面出现
                 ViewCommonData.loginWindow.setVisible(true);
                 ViewCommonData.loginSuccess = true;
-                //将当前状态换为登录
-                ViewCommonData.nowState = true;
             }
+            ViewCommonData.nowState = !ViewCommonData.nowState;
         }
 
         @Override
@@ -143,12 +148,9 @@ public class ViewListen {
     /**
      * 登录和注册界面的提示信息
      */
-    private static class LoginOrRegisterByInformationErrorListen {
-        private final JTextField userField;
-        private final JTextField passwordField;
-        private final Map<JTextField, JLabel> map;
-
-        public LoginOrRegisterByInformationErrorListen(Map<JTextField, JLabel> map, JTextField userField, JTextField passwordField) {
+    private record LoginOrRegisterByInformationErrorListen(Map<JTextField, JLabel> map, JTextField userField,
+                                                           JTextField passwordField) {
+        private LoginOrRegisterByInformationErrorListen(Map<JTextField, JLabel> map, JTextField userField, JTextField passwordField) {
             this.map = map;
             this.userField = userField;
             this.passwordField = passwordField;
@@ -218,13 +220,15 @@ public class ViewListen {
             if (ViewCommonData.loginSuccess) {
                 //如果通过校验
                 if (visitedDatabase()) {
-                    ViewCommonData.loginWindow.setVisible(false);
-                    ViewCommonData.loginSuccess = false;
                     if (ViewCommonData.gameView == null) {
                         ViewCommonData.gameView = new GameView();
+                        //清空
+                        ViewCommonData.loginWindow = ViewCommonData.registerWindow = null;
                     } else {
                         ViewCommonData.gameView.setVisible(true);
                     }
+                    ViewCommonData.loginSuccess = false;
+                    ViewCommonData.loginWindow.setVisible(false);
                 }
             }
         }

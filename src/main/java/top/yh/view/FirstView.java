@@ -21,7 +21,7 @@ public class FirstView extends JFrame {
          * 读取的数据文件
          */
         String filePath = PropertiesName.FIRST_VIEW_PATH;
-        final ViewAbstract firstData = new FirstDataAbstract(filePath);
+        final ViewAbstract firstData = new ViewAbstract(filePath) {};
         //初始化面板
         firstData.initFrame(this);
         //点击监听器
@@ -30,8 +30,6 @@ public class FirstView extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 ViewCommonData.loginWindow = new LoginOrRegisterView(ViewCommonData.login);
-                //设为可视化
-                ViewCommonData.loginWindow.setVisible(true);
                 //将第一个窗体隐藏
                 ViewCommonData.firstView.setVisible(false);
                 ViewCommonData.firstView = null;
@@ -41,16 +39,5 @@ public class FirstView extends JFrame {
         ViewCommonData.musicPlay = new MusicPlay("解压.wav");
         ViewCommonData.musicPlay.start();
         this.setVisible(true);
-    }
-
-    /**
-     * 第一个视图的数据
-     */
-    private static class FirstDataAbstract extends ViewAbstract {
-
-        public FirstDataAbstract(String filePath) {
-            super(filePath);
-        }
-
     }
 }
