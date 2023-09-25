@@ -1,8 +1,7 @@
 package top.yh.listen;
 
 import lombok.AllArgsConstructor;
-import top.yh.database.service.LoginService;
-import top.yh.database.service.RegisterService;
+import top.yh.database.service.UserService;
 import top.yh.resources.ViewCommonData;
 import top.yh.view.GameView;
 import top.yh.view.LoginOrRegisterView;
@@ -24,8 +23,7 @@ public class ViewListen {
     private LoginListenByRegisterOrRegisterListenByBack registerListenByBack;
     private LoginListenByRegisterOrRegisterListenByBack loginListenByRegister;
     private RegisterListenByRegister registerListenByRegister;
-    private LoginService loginService;
-    private RegisterService registerService;
+    private UserService userService;
 
     public void loginAndRegisterError(Map<JTextField, JLabel> map, JTextField userField, JTextField passwordField) {
         loginErrorListen = new LoginOrRegisterByInformationErrorListen(map, userField, passwordField);
@@ -43,10 +41,10 @@ public class ViewListen {
             //判断数据库
             user = loginErrorListen.userField.getText().trim();
             password = loginErrorListen.passwordField.getText().trim();
-            if (loginService == null) {
-                loginService = new LoginService();
+            if (userService == null) {
+                userService = new UserService();
             }
-            boolean ifUser = loginService.ifUser(user, password);
+            boolean ifUser = userService.ifUser(user, password);
             if (!ifUser) {
                 JOptionPane.showMessageDialog(null, "用户名或密码错误", "Title", JOptionPane.ERROR_MESSAGE);
             }
@@ -55,14 +53,11 @@ public class ViewListen {
             //是注册
             user = registerErrorListen.userField.getText().trim();
             password = registerErrorListen.passwordField.getText().trim();
-            if (registerService == null) {
-                registerService = new RegisterService();
-            }
-            if (registerService.ifUser(user)) {
+            if (userService.ifUser(user)) {
                 //如果有这个用户名
                 JOptionPane.showMessageDialog(null, "已有该用户名，请重新输入", "提示", JOptionPane.ERROR_MESSAGE);
             } else {
-                return registerService.addUser(user, password);
+                return userService.addUser(user, password);
             }
         }
         return false;

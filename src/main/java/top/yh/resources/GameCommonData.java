@@ -39,7 +39,7 @@ public class GameCommonData {
     /**
      * 是否已经开启的子弹定时器
      */
-    public static List<AbstractTankData> isBeginBullet;
+    public static List<TankAbstract> isBeginBullet;
     /**
      * 循环次数
      */
@@ -51,23 +51,23 @@ public class GameCommonData {
     /**
      * 所有物体
      */
-    public static List<AbstractTankData> superList;
+    public static List<TankAbstract> superList;
     /**
      * 出界或者没用的物体
      */
-    public static List<AbstractTankData> uselessList;
+    public static List<TankAbstract> uselessList;
     /**
      * 子弹
      */
-    public static List<AbstractTankData> heroBulletList;
+    public static List<TankAbstract> heroBulletList;
     /**
      * 敌方子弹
      */
-    public static List<AbstractTankData> enemyTankBulletList;
+    public static List<TankAbstract> enemyTankBulletList;
     /**
      * 敌方坦克
      */
-    public static List<AbstractTankData> enemyTankList;
+    public static List<TankAbstract> enemyTankList;
     /**
      * 还有多少子弹
      */
@@ -76,7 +76,7 @@ public class GameCommonData {
     /**
      * 存放敌方坦克和定时器的集合
      */
-    public static Map<AbstractTankData, List<javax.swing.Timer>> tankDataTimerMap;
+    public static Map<TankAbstract, List<javax.swing.Timer>> tankDataTimerMap;
     public static String killNumberName;
     private GameCommonData() {
 

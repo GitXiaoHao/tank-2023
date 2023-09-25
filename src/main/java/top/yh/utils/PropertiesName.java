@@ -1,4 +1,4 @@
-package top.yh;
+package top.yh.utils;
 
 /**
  * @author yuhao
@@ -7,6 +7,7 @@ package top.yh;
  **/
 
 public class PropertiesName {
+    public static final String DRUID_PATH = "../druid.properties";
     public static final String HERO_PATH = "../tank/hero.properties";
     public static final String ENEMY_TANK_PATH = "../tank/enemyTank.properties";
     public static final String BACK_IMAGE_PATH = "../tank/backImage.properties";

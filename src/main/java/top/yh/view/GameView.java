@@ -1,14 +1,14 @@
 package top.yh.view;
 
 import lombok.Getter;
-import top.yh.PropertiesName;
 import top.yh.database.utils.JdbcByDruid;
 import top.yh.listen.GameListen;
-import top.yh.resources.AbstractTankData;
-import top.yh.resources.AbstractViewData;
 import top.yh.resources.GameCommonData;
+import top.yh.resources.TankAbstract;
+import top.yh.resources.ViewAbstract;
 import top.yh.utils.Condition;
 import top.yh.utils.GetImage;
+import top.yh.utils.PropertiesName;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,19 +26,11 @@ public class GameView extends JFrame implements PropertyChangeListener {
     /**
      * 菜单界面
      */
-    private static final GameView.MenuView MENU_VIEW;
+    private final GameView.MenuView menuView;
     /**
      * 游戏的监听对象
      */
-    private static final GameListen GAME_LISTEN;
-
-    static {
-        // TODO 必须这样放
-        //游戏监听对象
-        GAME_LISTEN = new GameListen();
-        //菜单面板
-        MENU_VIEW = new MenuView();
-    }
+    private final GameListen gameListen;
 
     /**
      * 游戏界面的数据
@@ -50,30 +42,31 @@ public class GameView extends JFrame implements PropertyChangeListener {
         JdbcByDruid.close();
         //游戏窗体的文件路径
         final String filePath = PropertiesName.GAME_VIEW_PATH;
+        // TODO 必须这样放
+        //游戏监听对象
+        gameListen = new GameListen();
+        //菜单面板
+        menuView = new MenuView();
         //初始化界面数据对象
         viewData = new GameDataAbstract(filePath);
-        //加入其他数据
-        viewData.otherInitData();
         //初始化窗体
         viewData.initFrame(this);
         //取消边框
         this.setUndecorated(true);
-        //加入游戏面板
-        this.getContentPane().add(viewData.addBackImage(viewData.getJpanel()));
         //鼠标监听
-        this.addMouseListener(GAME_LISTEN.addGameFrameMouseListen());
+        this.addMouseListener(gameListen.addGameFrameMouseListen());
         //键盘监听
-        this.addKeyListener(GAME_LISTEN.addGameFrameKeyListen());
+        this.addKeyListener(gameListen.addGameFrameKeyListen());
         //初始化
-        GAME_LISTEN.notStartInitData();
+        gameListen.notStartInitData();
         //加入 PropertyChangeSupport
         GameCommonData.someListenValue.addPropertyChangeListener(this);
         //将菜单窗体可视化
-        MENU_VIEW.setVisible(true);
+        menuView.setVisible(true);
         //游戏窗体可视化
         this.setVisible(true);
         //加入游戏窗体重绘的定时器
-        GAME_LISTEN.addTimerForGameViewRepaint(viewData.getFlushMinus());
+        gameListen.addTimerForGameViewRepaint(viewData.getFlushMinus());
     }
 
 
@@ -93,18 +86,18 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 //未开始
                 graphics.drawImage(viewData.getBackGroundImage().getImage(), 0, 0, viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
                 //停止重绘
-                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.NotStarted);
+                gameListen.stopTimerForGameViewRepaint(Condition.NotStarted);
                 break;
             case Begin:
                 //开始重绘
-                GAME_LISTEN.addTimerForGameViewRepaint(viewData.getFlushMinus());
+                gameListen.addTimerForGameViewRepaint(viewData.getFlushMinus());
                 //计时器一直刷
-                GAME_LISTEN.addTimerForFlushEnemyTank();
+                gameListen.addTimerForFlushEnemyTank();
                 //丢掉
                 GameCommonData.superList.removeAll(GameCommonData.uselessList);
                 GameCommonData.uselessList.clear();
                 //重绘
-                for (AbstractTankData aSuper : GameCommonData.superList) {
+                for (TankAbstract aSuper : GameCommonData.superList) {
                     //画
                     aSuper.byImage(graphics);
                 }
@@ -115,18 +108,18 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 //失败
                 graphics.drawImage(viewData.failBackGroundImage, 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
-                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Fail);
+                gameListen.stopTimerForGameViewRepaint(Condition.Fail);
 
                 break;
             case Win:
                 //胜利
                 graphics.drawImage(viewData.winBackGroundImage, 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
-                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Win);
+                gameListen.stopTimerForGameViewRepaint(Condition.Win);
                 break;
             case Pause:
                 //暂停
-                GAME_LISTEN.stopTimerForGameViewRepaint(Condition.Pause);
+                gameListen.stopTimerForGameViewRepaint(Condition.Pause);
                 break;
             default:
                 break;
@@ -149,21 +142,18 @@ public class GameView extends JFrame implements PropertyChangeListener {
         Object oldValue = evt.getOldValue();
         //如果改变的时 killNumber 击败了多少坦克
         if (GameCommonData.killNumberName.equalsIgnoreCase(evtPropertyName)) {
-            //先打印
-            System.out.println(evtPropertyName + " 新数据 " + newValue + " 旧数据 " + oldValue);
             //看看是否已经到达要求停止刷新敌方坦克
-            GAME_LISTEN.stopFlushEnemyTank((int) newValue);
+            gameListen.stopFlushEnemyTank((int) newValue);
             //改变菜单面板的数据
-            MENU_VIEW.changeLabel(newValue);
+            menuView.changeLabel(newValue);
         }
-
     }
 
     /**
      * 游戏窗体的数据
      */
     @Getter
-    private static class GameDataAbstract extends AbstractViewData {
+    private class GameDataAbstract extends ViewAbstract {
         /**
          * 双缓冲图片
          */
@@ -183,21 +173,34 @@ public class GameView extends JFrame implements PropertyChangeListener {
         }
 
         @Override
-        protected void otherInitData() {
+        public void otherInitData() {
             //初始化游戏窗体信息
             this.failBackGroundImage = GetImage.getImage(this.getViewDataMap().get("failBackGroundImage"));
             this.winBackGroundImage = GetImage.getImage(this.getViewDataMap().get("winBackGroundImage"));
             this.flushMinus = Integer.parseInt(this.getViewDataMap().get("flushMinus"));
+        }
+
+        @Override
+        public JPanel initOtherPanel(JPanel panel) {
+            menuView.killLabel = new JLabel();
+            menuView.killLabel.setBounds(this.buttonX + (this.buttonDistance * (size++)),
+                    this.buttonY,
+                    this.labelWidth,
+                    this.labelHeight);
+            Font font = new java.awt.Font("宋体", Font.PLAIN, 30);
+            menuView. killLabel.setFont(font);
+            menuView.killLabel.setForeground(Color.darkGray);
+            panel.add(menuView.killLabel);
+            return panel;
         }
     }
 
     /**
      * 菜单面板
      */
-    private static class MenuView extends JFrame {
-        private static JLabel killLabel;
-
-        private MenuView() {
+    private class MenuView extends JFrame {
+        public JLabel killLabel;
+        public MenuView() {
             String filePath = PropertiesName.MENU_VIEW_PATH;
             final MenuDataAbstract menuData = new MenuDataAbstract(filePath);
             menuData.initFrame(this);
@@ -205,32 +208,20 @@ public class GameView extends JFrame implements PropertyChangeListener {
             //取消边框
             this.setUndecorated(true);
             //设置位置
-            this.setBounds(menuData.menuWindowX, menuData.menuWindowY, menuData.getWindowsWidth(), menuData.getWindowsHeight());
-            this.getContentPane().add(menuData.addBackImage(menuData.addButton(menuData.getJpanel())));
+            this.setBounds(menuData.getMenuWindowX(), menuData.getMenuWindowY(), menuData.getWindowsWidth(), menuData.getWindowsHeight());
         }
 
         public void changeLabel(Object newValue) {
             killLabel.setText("当前已击杀" + newValue + "个坦克");
         }
 
-        private static class MenuDataAbstract extends AbstractViewData {
-            private int size = 0;
-            private int menuWindowX;
-            private int menuWindowY;
-            private int buttonX;
-            private int buttonY;
-            private int buttonWidth;
-            private int buttonHeight;
-            private int buttonDistance;
-            private int labelWidth;
-            private int labelHeight;
-
+        private class MenuDataAbstract extends ViewAbstract {
             public MenuDataAbstract(String filePath) {
                 super(filePath);
             }
 
             @Override
-            protected void otherInitData() {
+            public void otherInitData() {
                 this.menuWindowX = Integer.parseInt(this.getViewDataMap().get("menuWindowX"));
                 this.menuWindowY = Integer.parseInt(this.getViewDataMap().get("menuWindowY"));
                 this.buttonX = Integer.parseInt(this.getViewDataMap().get("buttonX"));
@@ -241,40 +232,8 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 this.labelWidth = Integer.parseInt(this.getViewDataMap().get("labelWidth"));
                 this.labelHeight = Integer.parseInt(this.getViewDataMap().get("labelHeight"));
             }
-
-            public JPanel addButton(JPanel panel) {
-                JButton exitButton = new JButton("退出");
-                JButton stopOrBeginButton = new JButton("开始");
-                JButton againButton = new JButton("重玩");
-                JButton backButton = new JButton("返回");
-                initButton(backButton);
-                initButton(stopOrBeginButton);
-                initButton(againButton);
-                initButton(exitButton);
-                //添加监听器
-                exitButton.addActionListener(GAME_LISTEN.addExitButtonListen(exitButton));
-                stopOrBeginButton.addActionListener(GAME_LISTEN.addStopOrBeginButtonListen(stopOrBeginButton));
-                panel.add(backButton);
-                panel.add(stopOrBeginButton);
-                addLabel(panel);
-                panel.add(againButton);
-                panel.add(exitButton);
-                return panel;
-            }
-
-            public void addLabel(JPanel panel) {
-                killLabel = new JLabel();
-                killLabel.setBounds(this.buttonX + (this.buttonDistance * (size++)),
-                        this.buttonY,
-                        this.labelWidth,
-                        this.labelHeight);
-                Font font = new java.awt.Font("宋体", Font.PLAIN, 30);
-                killLabel.setFont(font);
-                killLabel.setForeground(Color.darkGray);
-                panel.add(killLabel);
-            }
-
-            private void initButton(JButton button) {
+            @Override
+            protected void initButton(JButton button) {
                 Font font = new java.awt.Font("华文行楷", Font.PLAIN, 30);
                 button.setBounds(this.buttonX + (this.buttonDistance * (size++)),
                         this.buttonY,
@@ -304,6 +263,26 @@ public class GameView extends JFrame implements PropertyChangeListener {
                     }
                 });
             }
+            @Override
+            public JPanel initOtherPanel(JPanel panel) {
+                JButton exitButton = new JButton("退出");
+                JButton stopOrBeginButton = new JButton("开始");
+                JButton againButton = new JButton("重玩");
+                JButton backButton = new JButton("返回");
+                initButton(backButton);
+                initButton(stopOrBeginButton);
+                initButton(againButton);
+                initButton(exitButton);
+                //添加监听器
+                exitButton.addActionListener(gameListen.addExitButtonListen(exitButton));
+                stopOrBeginButton.addActionListener(gameListen.addStopOrBeginButtonListen(stopOrBeginButton));
+                panel.add(backButton);
+                panel.add(stopOrBeginButton);
+                panel.add(againButton);
+                panel.add(exitButton);
+                return panel;
+            }
         }
+
     }
 }

@@ -1,15 +1,14 @@
 package top.yh.view;
 
-import top.yh.PropertiesName;
+import top.yh.utils.PropertiesName;
 import top.yh.music.MusicPlay;
+import top.yh.resources.ViewAbstract;
 import top.yh.resources.ViewCommonData;
-import top.yh.resources.AbstractViewData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.*;
 
 /**
  * @author yuhao
@@ -17,26 +16,14 @@ import java.util.concurrent.*;
  * 第一个视图 程序主入口
  **/
 public class FirstView extends JFrame {
-
-    /**
-     * 线程池
-     */
-    public static ExecutorService threadPool = new ThreadPoolExecutor(2, 5,
-            1L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(3),
-            Executors.defaultThreadFactory(),
-            new ThreadPoolExecutor.AbortPolicy());
-
     public FirstView() throws HeadlessException {
         /*
          * 读取的数据文件
          */
         String filePath = PropertiesName.FIRST_VIEW_PATH;
-        final AbstractViewData firstData = new FirstDataAbstract(filePath);
+        final ViewAbstract firstData = new FirstDataAbstract(filePath);
         //初始化面板
         firstData.initFrame(this);
-        //添加窗体
-        this.getContentPane().add(firstData.addBackImage(firstData.getJpanel()));
         //点击监听器
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -47,10 +34,10 @@ public class FirstView extends JFrame {
                 ViewCommonData.loginWindow.setVisible(true);
                 //将第一个窗体隐藏
                 ViewCommonData.firstView.setVisible(false);
+                ViewCommonData.firstView = null;
             }
         });
         //开始音乐
-//        threadPool.execute(musicPlay);
         ViewCommonData.musicPlay = new MusicPlay("解压.wav");
         ViewCommonData.musicPlay.start();
         this.setVisible(true);
@@ -59,20 +46,11 @@ public class FirstView extends JFrame {
     /**
      * 第一个视图的数据
      */
-    private static class FirstDataAbstract extends AbstractViewData {
+    private static class FirstDataAbstract extends ViewAbstract {
 
         public FirstDataAbstract(String filePath) {
             super(filePath);
         }
 
-        @Override
-        protected void otherInitData() {
-
-        }
     }
-
-    public static void main(String[] args) {
-        ViewCommonData.firstView = new FirstView();
-    }
-
 }

@@ -19,7 +19,7 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public abstract class AbstractTankData extends SerialCloneable{
+public abstract class TankAbstract extends SerialCloneable{
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -56,7 +56,7 @@ public abstract class AbstractTankData extends SerialCloneable{
     private Image[] images;
     private String filePath;
 
-    public AbstractTankData(String filePath) {
+    public TankAbstract(String filePath) {
         this.filePath = filePath;
         initData();
     }

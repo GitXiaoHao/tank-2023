@@ -1,9 +1,9 @@
 package top.yh.listen;
 
 import lombok.SneakyThrows;
-import top.yh.PropertiesName;
+import top.yh.utils.PropertiesName;
 import top.yh.obj.Super;
-import top.yh.resources.AbstractTankData;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
 import top.yh.timer.AddTimer;
 import top.yh.utils.Condition;
@@ -63,7 +63,7 @@ public class SuperListen {
         }
     }
 
-    public void timerForEnemyTankBullet(AbstractTankData tank) {
+    public void timerForEnemyTankBullet(TankAbstract tank) {
         this.addTimer.forEnemyTankBulletStart(tank, this.beginResources.enemyTankBullet);
     }
 
@@ -72,7 +72,7 @@ public class SuperListen {
      *
      * @param enemyTank 敌方坦克
      */
-    public void timerForEnemyTankIsInspect(AbstractTankData enemyTank) {
+    public void timerForEnemyTankIsInspect(TankAbstract enemyTank) {
         this.addTimer.forEnemyTankInspectAndExchangeDirection(enemyTank, 3100);
     }
 
@@ -91,7 +91,7 @@ public class SuperListen {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_W:
                 case KeyEvent.VK_UP:
-                    for (AbstractTankData data : GameCommonData.superList) {
+                    for (TankAbstract data : GameCommonData.superList) {
                         if (!(data instanceof Super.Hero)) {
                             data.setY(data.getY() + data.getSpeed());
                         }
@@ -105,7 +105,7 @@ public class SuperListen {
                     //下
                     beginResources.hero.setY(beginResources.hero.getY() + beginResources.hero.getSpeed());
                     beginResources.hero.setDirection(Direction.DOWN);
-                    for (AbstractTankData data : GameCommonData.superList) {
+                    for (TankAbstract data : GameCommonData.superList) {
                         if (!(data instanceof Super.Hero)) {
                             data.setY(data.getY() - data.getSpeed());
                         }
@@ -116,7 +116,7 @@ public class SuperListen {
                     //左
                     beginResources.hero.setX(beginResources.hero.getX() - beginResources.hero.getSpeed());
                     beginResources.hero.setDirection(Direction.LEFT);
-                    for (AbstractTankData data : GameCommonData.superList) {
+                    for (TankAbstract data : GameCommonData.superList) {
                         if (!(data instanceof Super.Hero)) {
                             data.setX(data.getX() + data.getSpeed());
                         }
@@ -127,7 +127,7 @@ public class SuperListen {
                     //右
                     beginResources.hero.setX(beginResources.hero.getX() + beginResources.hero.getSpeed());
                     beginResources.hero.setDirection(Direction.RIGHT);
-                    for (AbstractTankData data : GameCommonData.superList) {
+                    for (TankAbstract data : GameCommonData.superList) {
                         if (!(data instanceof Super.Hero)) {
                             data.setX(data.getX() - data.getSpeed());
                         }
@@ -138,7 +138,7 @@ public class SuperListen {
                     //判断是否还有子弹
                     if (GameCommonData.surplusHeroBulletNumber.get() <= heroBulletNumber) {
                         GameCommonData.surplusHeroBulletNumber.getAndIncrement();
-                        AbstractTankData bullet = (Super.HeroBullet) beginResources.heroBullet.clone();
+                        TankAbstract bullet = (Super.HeroBullet) beginResources.heroBullet.clone();
                         bullet.setX(beginResources.hero.getX() + 15);
                         bullet.setY(beginResources.hero.getY() + 15);
                         bullet.setDirection(beginResources.hero.getDirection());
@@ -156,11 +156,11 @@ public class SuperListen {
      * 开始时的资源
      */
     private class BeginResources {
-        private final AbstractTankData hero;
-        private final AbstractTankData backImage;
-        private final AbstractTankData heroBullet;
-        private final AbstractTankData enemyTank;
-        private final AbstractTankData enemyTankBullet;
+        private final TankAbstract hero;
+        private final TankAbstract backImage;
+        private final TankAbstract heroBullet;
+        private final TankAbstract enemyTank;
+        private final TankAbstract enemyTankBullet;
 
         private BeginResources() {
             hero = new Super.Hero(PropertiesName.HERO_PATH);

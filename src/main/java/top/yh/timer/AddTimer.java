@@ -1,8 +1,8 @@
 package top.yh.timer;
 
-import top.yh.PropertiesName;
+import top.yh.utils.PropertiesName;
 import top.yh.obj.Super;
-import top.yh.resources.AbstractTankData;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
 import top.yh.resources.ViewCommonData;
 import top.yh.utils.Direction;
@@ -49,7 +49,7 @@ public class AddTimer {
      * @param enemyTank 当前的这个坦克
      * @return 如果出界返回true 没有出界返回false
      */
-    private static synchronized boolean outside(AbstractTankData enemyTank) {
+    private static synchronized boolean outside(TankAbstract enemyTank) {
         if (enemyTank.getX() + enemyTank.getWidth() <= 0) {
             //如果在左边
             //就一直往右走
@@ -104,7 +104,7 @@ public class AddTimer {
      * @param tankDistance
      * @param enemyTank
      */
-    public void forFlushEnemyTankStart(int tankDistance, AbstractTankData enemyTank) {
+    public void forFlushEnemyTankStart(int tankDistance, TankAbstract enemyTank) {
         if (flushEnemyTank == null) {
             flushEnemyTank = new FlushEnemyTank(tankDistance, enemyTank);
             timerSet.add(flushEnemyTank.start());
@@ -119,7 +119,7 @@ public class AddTimer {
      * 给每一个敌方坦克都加一个定时器
      * 判断是否出界并且换方向
      */
-    public void forEnemyTankInspectAndExchangeDirection(AbstractTankData enemyTank, int delay) {
+    public void forEnemyTankInspectAndExchangeDirection(TankAbstract enemyTank, int delay) {
         if (flushEnemyTankInspectAndExchangeDirection == null) {
             flushEnemyTankInspectAndExchangeDirection = new FlushEnemyTankInspectAndExchangeDirection();
         }
@@ -132,7 +132,7 @@ public class AddTimer {
      * @param tank
      * @param enemyTankBullet
      */
-    public void forEnemyTankBulletStart(AbstractTankData tank, AbstractTankData enemyTankBullet) {
+    public void forEnemyTankBulletStart(TankAbstract tank, TankAbstract enemyTankBullet) {
         if (this.flushEnemyTankBullet == null) {
             flushEnemyTankBullet = new FlushEnemyTankBullet();
         }
@@ -143,7 +143,7 @@ public class AddTimer {
      * 判断坦克出界和换方向
      */
     private static class FlushEnemyTankInspectAndExchangeDirection {
-        public Timer start(AbstractTankData enemyTank, int delay) {
+        public Timer start(TankAbstract enemyTank, int delay) {
             //开启定时器
             //看看越界没 并且更换方向
             Timer timer = new Timer(delay, (e) -> {
@@ -177,10 +177,10 @@ public class AddTimer {
          */
         private final int tankDistance;
 
-        private final AbstractTankData enemyTank;
+        private final TankAbstract enemyTank;
         private Timer enemyTankTimer;
 
-        public FlushEnemyTank(int tankDistance, AbstractTankData enemyTank) {
+        public FlushEnemyTank(int tankDistance, TankAbstract enemyTank) {
             this.size = new AtomicInteger(0);
             this.tankDistance = tankDistance;
             this.enemyTank = enemyTank;
@@ -189,7 +189,7 @@ public class AddTimer {
         public Timer start() {
             if (enemyTankTimer == null) {
                 enemyTankTimer = new Timer(Integer.parseInt(GetProperties.getSpecificData(PropertiesName.ENEMY_TANK_PATH, "flushMinus")), e -> {
-                    AbstractTankData tank = (Super.EnemyTank) enemyTank.clone();
+                    TankAbstract tank = (Super.EnemyTank) enemyTank.clone();
                     tank.setX(tank.getX() + (tankDistance * (size.getAndIncrement())));
                     GameCommonData.superList.add(tank);
                     GameCommonData.enemyTankList.add(tank);
@@ -209,7 +209,7 @@ public class AddTimer {
     }
 
     private static class FlushEnemyTankBullet {
-        public Timer start(AbstractTankData tank, AbstractTankData enemyTankBullet) {
+        public Timer start(TankAbstract tank, TankAbstract enemyTankBullet) {
             Timer enemyTankBulletTimer = new Timer(Integer.parseInt(GetProperties.getSpecificData(PropertiesName.ENEMY_TANK_BULLET_PATH, "flushMinus")), e1 -> {
                 if (!outside(tank)) {
                     //判断是否已经出界

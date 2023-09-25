@@ -1,7 +1,7 @@
 package top.yh.listen;
 
 import lombok.Getter;
-import top.yh.resources.AbstractTankData;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
 import top.yh.resources.ViewCommonData;
 import top.yh.utils.Condition;
@@ -67,7 +67,7 @@ public class GameListen {
             superListen.timerForFlushEnemyTank();
         }
         for (int i = 0; i < GameCommonData.enemyTankList.size(); i++) {
-            AbstractTankData tank = GameCommonData.enemyTankList.get(i);
+            TankAbstract tank = GameCommonData.enemyTankList.get(i);
             //如果有就true
             boolean aBoolean = GameCommonData.isBeginBullet.contains(tank);
             if (!aBoolean) {

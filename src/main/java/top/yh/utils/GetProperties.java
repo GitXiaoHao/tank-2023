@@ -66,7 +66,6 @@ public class GetProperties {
             String strKey = (String) en.nextElement();
             //获得value
             String strValue = pps.getProperty(strKey);
-            System.out.println(strKey + "=" + strValue);
             //记录数据
             dataMap.put(strKey, strValue);
         }

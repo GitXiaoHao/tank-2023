@@ -1,8 +1,8 @@
 package top.yh.obj;
 
 
-import top.yh.PropertiesName;
-import top.yh.resources.AbstractTankData;
+import top.yh.utils.PropertiesName;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
 import top.yh.utils.Condition;
 import top.yh.utils.Direction;
@@ -20,7 +20,7 @@ import java.util.Random;
  * @author yu<p>
  * 超类
  */
-public class Super extends AbstractTankData {
+public class Super extends TankAbstract {
     private static final int WINDOWS_WIDTH = Integer.parseInt(GetProperties.getSpecificData(
             PropertiesName.GAME_VIEW_PATH, "windowsWidth"));
     private static final int WINDOWS_HEIGHT = Integer.parseInt(GetProperties.getSpecificData(
@@ -79,7 +79,7 @@ public class Super extends AbstractTankData {
                 this.setY(0);
             }
             for (int i = 0; i < GameCommonData.enemyTankBulletList.size(); i++) {
-                AbstractTankData data = GameCommonData.enemyTankBulletList.get(i);
+                TankAbstract data = GameCommonData.enemyTankBulletList.get(i);
                 if (data.getRec().intersects(this.getRec())) {
                     //碰到了
                     //变为失败
@@ -157,7 +157,7 @@ public class Super extends AbstractTankData {
                 this.setSpeed(3);
             }
             for (int i = 0; i < GameCommonData.heroBulletList.size(); i++) {
-                AbstractTankData data = GameCommonData.heroBulletList.get(i);
+                TankAbstract data = GameCommonData.heroBulletList.get(i);
                 if (data.getRec().intersects(this.getRec())) {
                     //如果相撞
                     //丢掉

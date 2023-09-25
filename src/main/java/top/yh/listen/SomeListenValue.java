@@ -19,13 +19,14 @@ public class SomeListenValue {
      */
     @Getter
     private Integer killNumber;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
 
     public void setKillNumber(Integer newValue) {
         Integer oldValue = this.killNumber;
         this.killNumber = newValue;
         this.pcs.firePropertyChange(GameCommonData.killNumberName, oldValue, newValue);
     }
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         this.pcs.addPropertyChangeListener(listener);

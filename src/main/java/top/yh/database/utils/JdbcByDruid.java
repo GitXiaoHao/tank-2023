@@ -2,6 +2,7 @@ package top.yh.database.utils;
 
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import lombok.SneakyThrows;
+import top.yh.utils.PropertiesName;
 
 import javax.sql.DataSource;
 import java.io.InputStreamReader;
@@ -28,8 +29,7 @@ public class JdbcByDruid {
         //获取链接
         Properties properties = new Properties();
         try {
-            properties.load(new InputStreamReader(Objects.requireNonNull(JdbcByDruid.class.getResourceAsStream("../druid.properties"))));
-            System.out.println(properties.get("url"));
+            properties.load(new InputStreamReader(Objects.requireNonNull(JdbcByDruid.class.getResourceAsStream(PropertiesName.DRUID_PATH))));
             dataSource = DruidDataSourceFactory.createDataSource(properties);
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class JdbcByDruid {
         //判断是否为空
         try {
             Connection connection = TC.get();
-            if(connection != null) {
+            if (connection != null) {
                 connection.close();
             }
             TC.remove();
