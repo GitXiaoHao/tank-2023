@@ -1,6 +1,5 @@
 package top.yh.timer;
 
-import top.yh.obj.Super;
 import top.yh.resources.GameCommonData;
 import top.yh.resources.TankAbstract;
 import top.yh.resources.ViewCommonData;
@@ -47,7 +46,7 @@ public class AddTimer {
      * @param enemyTank 当前的这个坦克
      * @return 如果出界返回true 没有出界返回false
      */
-    private static synchronized boolean outside(TankAbstract enemyTank) {
+    private synchronized boolean outside(TankAbstract enemyTank) {
         if (enemyTank.getX() + enemyTank.getWidth() <= 0) {
             //如果在左边
             //就一直往右走
@@ -83,8 +82,9 @@ public class AddTimer {
         if (flushGameView == null) {
             flushGameView = new FlushGameView();
             GameCommonData.someListenValue.setKillNumber(0);
+            this.timerSet.add(flushGameView.start(delay));
         }
-        this.timerSet.add(flushGameView.start(delay));
+        this.timerSet.forEach(Timer::start);
     }
 
     /**
@@ -94,6 +94,8 @@ public class AddTimer {
         if (flushGameView != null) {
             flushGameView.stop();
         }
+        // timer stop
+        this.timerSet.forEach(Timer::stop);
     }
 
     /**
@@ -141,8 +143,7 @@ public class AddTimer {
         //开启定时器
         //看看越界没 并且更换方向
         Timer timer = new Timer(delay, (e) -> {
-            boolean outside = false;
-            if (!outside) {
+            if (!outside(enemyTank)) {
                 //没有出界
                 //换方向
                 //随机产生方向
@@ -170,7 +171,7 @@ public class AddTimer {
             if (!outside(tank)) {
                 //判断是否已经出界
                 //没有出界
-                Super.EnemyTankBullet tankBullet = (Super.EnemyTankBullet) enemyTankBullet.clone();
+                TankAbstract tankBullet = enemyTankBullet.clone();
                 tankBullet.setX(tank.getX() + 18);
                 tankBullet.setY(tank.getY() + 15);
                 tankBullet.setDirection(tank.getDirection());
@@ -210,7 +211,7 @@ public class AddTimer {
         public Timer start() {
             if (enemyTankTimer == null) {
                 enemyTankTimer = new Timer(Integer.parseInt(GetProperties.getSpecificData(PropertiesName.ENEMY_TANK_PATH, "flushMinus")), e -> {
-                    TankAbstract tank = (Super.EnemyTank) enemyTank.clone();
+                    TankAbstract tank = enemyTank.clone();
                     tank.setX(tank.getX() + (tankDistance * (size.getAndIncrement())));
                     GameCommonData.superList.add(tank);
                     GameCommonData.enemyTankList.add(tank);

@@ -151,7 +151,8 @@ public class GameListen {
         isGameViewRepaint = false;
         superListen.stopForGameRepaint();
         switch (condition) {
-            case NotStarted, Fail, Win -> exitButtonListen.button.setEnabled(true);
+            case NotStarted, Fail,
+                    Win -> exitButtonListen.button.setEnabled(true);
             case Pause, Begin,
                     default -> {
             }
@@ -235,16 +236,15 @@ public class GameListen {
         @Override
         public void actionPerformed(ActionEvent e) {
             switch (GameCommonData.state) {
-                case Begin:
+                case Begin -> {
                     //当前是开始状态
                     //改为暂停
                     GameCommonData.state = Condition.Pause;
                     this.button.setText("开始");
                     //退出键可以按下
                     exitButtonListen.button.setEnabled(true);
-                    break;
-                case Pause:
-                case NotStarted:
+                }
+                case Pause, NotStarted -> {
                     //当前是暂停状态
                     //改为开始
                     GameCommonData.state = Condition.Begin;
@@ -253,8 +253,9 @@ public class GameListen {
                     exitButtonListen.button.setEnabled(false);
                     //要重绘
                     ViewCommonData.gameView.repaint();
-                    break;
-                default:
+                }
+                default -> {
+                }
             }
         }
     }

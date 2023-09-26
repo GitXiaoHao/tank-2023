@@ -1,12 +1,13 @@
 package top.yh.obj;
 
 
-import top.yh.utils.PropertiesName;
-import top.yh.resources.TankAbstract;
+import lombok.SneakyThrows;
 import top.yh.resources.GameCommonData;
+import top.yh.resources.TankAbstract;
 import top.yh.utils.Condition;
 import top.yh.utils.Direction;
 import top.yh.utils.GetProperties;
+import top.yh.utils.PropertiesName;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,16 +37,11 @@ public class Super extends TankAbstract {
         //移动
         switch (getDirection()) {
             //上
-            case UP ->
-                //y--
-                    setY(getY() - getSpeed());
-
+            case UP -> setY(getY() - getSpeed());
             //下
             case DOWN -> setY(getY() + getSpeed());
-
             //左
             case LEFT -> setX(getX() - getSpeed());
-
             //右
             case RIGHT -> setX(getX() + getSpeed());
             default -> {
@@ -142,15 +138,12 @@ public class Super extends TankAbstract {
         }
 
         @Override
+        @SneakyThrows
         public void byImage(Graphics graphics) {
             //如果方向错误
             if (this.getDirection() == Direction.DEFAULT) {
                 int i = new Random().nextInt(Direction.values().length - 2);
                 this.setDirection(Direction.changeOfString(i + ""));
-            }
-            //如果速度为0
-            if (this.getSpeed() <= 0) {
-                this.setSpeed(3);
             }
             for (int i = 0; i < GameCommonData.heroBulletList.size(); i++) {
                 TankAbstract data = GameCommonData.heroBulletList.get(i);
@@ -162,16 +155,11 @@ public class Super extends TankAbstract {
                     GameCommonData.heroBulletList.remove(data);
                     GameCommonData.enemyTankList.remove(this);
                     List<Timer> timerList = GameCommonData.tankDataTimerMap.get(this);
-                    for (Timer timer : timerList) {
-                        timer.stop();
-                    }
+                    timerList.forEach(Timer::stop);
                     GameCommonData.tankDataTimerMap.remove(this);
-                    //看是不是我方子弹
-                    if (data instanceof HeroBullet) {
-                        GameCommonData.surplusHeroBulletNumber.decrementAndGet();
-                        //消灭敌人的数量++
-                        GameCommonData.someListenValue.setKillNumber(GameCommonData.someListenValue.getKillNumber() + 1);
-                    }
+                    GameCommonData.surplusHeroBulletNumber.decrementAndGet();
+                    //消灭敌人的数量++
+                    GameCommonData.someListenValue.setKillNumber(GameCommonData.someListenValue.getKillNumber() + 1);
                 }
             }
             super.byImage(graphics);
@@ -186,7 +174,12 @@ public class Super extends TankAbstract {
 
         @Override
         public void byImage(Graphics graphics) {
-            if (this.getDirection() == Direction.DEFAULT || this.getSpeed() == 0) {
+            if (this.getX() + this.getWidth() <= 0 ||
+                    this.getX() - this.getWidth() >= WINDOWS_WIDTH ||
+                    this.getY() + this.getHeight() <= 0 ||
+                    this.getY() - this.getHeight() >= WINDOWS_HEIGHT ||
+                    this.getDirection() == Direction.DEFAULT ||
+                    this.getSpeed() == 0) {
                 //移除
                 GameCommonData.enemyTankBulletList.remove(this);
                 GameCommonData.uselessList.add(this);

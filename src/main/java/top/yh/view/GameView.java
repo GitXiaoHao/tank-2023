@@ -1,6 +1,5 @@
 package top.yh.view;
 
-import lombok.Getter;
 import top.yh.database.utils.JdbcByDruid;
 import top.yh.listen.GameListen;
 import top.yh.resources.GameCommonData;
@@ -20,10 +19,6 @@ import java.awt.*;
  **/
 public class GameView extends JFrame {
     /**
-     * 菜单界面
-     */
-    private final MenuView menuView;
-    /**
      * 游戏的监听对象
      */
     private final GameListen gameListen;
@@ -42,7 +37,7 @@ public class GameView extends JFrame {
         //游戏监听对象
         gameListen = new GameListen();
         //菜单面板
-        menuView = new MenuView(gameListen);
+        MenuView menuView = new MenuView(gameListen);
         //初始化界面数据对象
         viewData = new GameDataAbstract(filePath);
         //初始化窗体
@@ -105,7 +100,6 @@ public class GameView extends JFrame {
                 graphics.drawImage(viewData.getFailBackGroundImage(), 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
                 gameListen.stopTimerForGameViewRepaint(Condition.Fail);
-
                 break;
             case Win:
                 //胜利
@@ -114,6 +108,14 @@ public class GameView extends JFrame {
                 gameListen.stopTimerForGameViewRepaint(Condition.Win);
                 break;
             case Pause:
+                //重绘
+                for (TankAbstract aSuper : GameCommonData.superList) {
+                    //画
+                    aSuper.byImage(graphics);
+                }
+                graphics.setColor(Color.RED);
+                graphics.setFont(new Font("宋体", Font.PLAIN, 30));
+                graphics.drawString("已暂停",viewData.getWindowsWidth() / 8 + viewData.getWindowsWidth() / 3,viewData.getWindowsHeight() / 2);
                 //暂停
                 gameListen.stopTimerForGameViewRepaint(Condition.Pause);
                 break;
@@ -126,8 +128,7 @@ public class GameView extends JFrame {
     /**
      * 游戏窗体的数据
      */
-    @Getter
-    private class GameDataAbstract extends ViewAbstract {
+    private static class GameDataAbstract extends ViewAbstract {
 
 
         public GameDataAbstract(String filePath) {
@@ -140,12 +141,6 @@ public class GameView extends JFrame {
             this.failBackGroundImage = GetImage.getImage(this.getViewDataMap().get("failBackGroundImage"));
             this.winBackGroundImage = GetImage.getImage(this.getViewDataMap().get("winBackGroundImage"));
             this.flushMinus = Integer.parseInt(this.getViewDataMap().get("flushMinus"));
-        }
-
-        @Override
-        public JPanel initOtherPanel(JPanel panel) {
-
-            return panel;
         }
     }
 }

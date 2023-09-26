@@ -19,7 +19,7 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public abstract class TankAbstract extends SerialCloneable{
+public abstract class TankAbstract extends SerialCloneable<TankAbstract>{
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -46,6 +46,8 @@ public abstract class TankAbstract extends SerialCloneable{
      * 速度
      */
     private int speed;
+
+
     /**
      * 方向
      */
