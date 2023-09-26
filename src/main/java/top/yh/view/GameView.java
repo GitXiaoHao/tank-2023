@@ -12,15 +12,13 @@ import top.yh.utils.PropertiesName;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * @author yuhao
  * @date 2023/2/3
  * 游戏界面
  **/
-public class GameView extends JFrame implements PropertyChangeListener {
+public class GameView extends JFrame {
     /**
      * 菜单界面
      */
@@ -55,14 +53,14 @@ public class GameView extends JFrame implements PropertyChangeListener {
         this.addMouseListener(gameListen.addGameFrameMouseListen());
         //键盘监听
         this.addKeyListener(gameListen.addGameFrameKeyListen());
-        //初始化
-        gameListen.notStartInitData();
         //加入 PropertyChangeSupport
-        GameCommonData.someListenValue.addPropertyChangeListener(this);
-        //将菜单窗体可视化
-        menuView.setVisible(true);
+        GameCommonData.someListenValue.addPropertyChangeListener(menuView);
         //游戏窗体可视化
         this.setVisible(true);
+        //将菜单窗体可视化
+        menuView.setVisible(true);
+        //初始化
+        gameListen.notStartInitData();
         //加入游戏窗体重绘的定时器
         gameListen.addTimerForGameViewRepaint(viewData.getFlushMinus());
     }
@@ -71,11 +69,11 @@ public class GameView extends JFrame implements PropertyChangeListener {
     @Override
     public void paint(Graphics g) {
         //初始化双缓冲
-        if (viewData.image == null) {
-            viewData.image = createImage(viewData.getWindowsWidth(), viewData.getWindowsHeight());
+        if (viewData.getImage() == null) {
+            viewData.setImage(createImage(viewData.getWindowsWidth(), viewData.getWindowsHeight()));
         }
         //获取画笔
-        Graphics graphics = viewData.image.getGraphics();
+        Graphics graphics = viewData.getImage().getGraphics();
         //绘制填充
         graphics.fillRect(0, 0, viewData.getWindowsWidth(), viewData.getWindowsHeight());
         //判断
@@ -104,14 +102,14 @@ public class GameView extends JFrame implements PropertyChangeListener {
                 break;
             case Fail:
                 //失败
-                graphics.drawImage(viewData.failBackGroundImage, 0, 0,
+                graphics.drawImage(viewData.getFailBackGroundImage(), 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
                 gameListen.stopTimerForGameViewRepaint(Condition.Fail);
 
                 break;
             case Win:
                 //胜利
-                graphics.drawImage(viewData.winBackGroundImage, 0, 0,
+                graphics.drawImage(viewData.getWinBackGroundImage(), 0, 0,
                         viewData.getWindowsWidth(), viewData.getWindowsHeight(), null);
                 gameListen.stopTimerForGameViewRepaint(Condition.Win);
                 break;
@@ -122,29 +120,7 @@ public class GameView extends JFrame implements PropertyChangeListener {
             default:
                 break;
         }
-        g.drawImage(viewData.image, 0, 0, null);
-    }
-
-    /**
-     * PropertyChangeSupport 当里面的数据变化时自动调用
-     * @param evt A PropertyChangeEvent object describing the event source
-     *          and the property that has changed.
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        //改变数据的名字
-        String evtPropertyName = evt.getPropertyName();
-        //改变后的数据
-        Object newValue = evt.getNewValue();
-        //改变前的数据
-        Object oldValue = evt.getOldValue();
-        //如果改变的时 killNumber 击败了多少坦克
-        if (GameCommonData.killNumberName.equalsIgnoreCase(evtPropertyName)) {
-            //看看是否已经到达要求停止刷新敌方坦克
-            gameListen.stopFlushEnemyTank((int) newValue);
-            //改变菜单面板的数据
-            menuView.changeLabel(newValue);
-        }
+        g.drawImage(viewData.getImage(), 0, 0, null);
     }
 
     /**
@@ -152,19 +128,7 @@ public class GameView extends JFrame implements PropertyChangeListener {
      */
     @Getter
     private class GameDataAbstract extends ViewAbstract {
-        /**
-         * 双缓冲图片
-         */
-        private Image image = null;
-        /**
-         * 失败背景图
-         */
-        private Image failBackGroundImage;
-        private int flushMinus;
-        /**
-         * 胜利背景图
-         */
-        private Image winBackGroundImage;
+
 
         public GameDataAbstract(String filePath) {
             super(filePath);
@@ -180,15 +144,7 @@ public class GameView extends JFrame implements PropertyChangeListener {
 
         @Override
         public JPanel initOtherPanel(JPanel panel) {
-            menuView.killLabel = new JLabel();
-            menuView.killLabel.setBounds(this.buttonX + (this.buttonDistance * (size++)),
-                    this.buttonY,
-                    this.labelWidth,
-                    this.labelHeight);
-            Font font = new java.awt.Font("宋体", Font.PLAIN, 30);
-            menuView. killLabel.setFont(font);
-            menuView.killLabel.setForeground(Color.darkGray);
-            panel.add(menuView.killLabel);
+
             return panel;
         }
     }

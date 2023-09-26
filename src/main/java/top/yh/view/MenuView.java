@@ -1,6 +1,7 @@
 package top.yh.view;
 
 import top.yh.listen.GameListen;
+import top.yh.resources.GameCommonData;
 import top.yh.resources.ViewAbstract;
 import top.yh.utils.PropertiesName;
 
@@ -8,12 +9,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * @author yuhao
  * @date 2023/9/25
  **/
-public class MenuView extends JFrame {
+public class MenuView extends JFrame implements PropertyChangeListener {
     public JLabel killLabel;
     private final GameListen gameListen;
 
@@ -31,6 +34,23 @@ public class MenuView extends JFrame {
 
     public void changeLabel(Object newValue) {
         killLabel.setText("当前已击杀" + newValue + "个坦克");
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        //改变数据的名字
+        String evtPropertyName = evt.getPropertyName();
+        //改变后的数据
+        Object newValue = evt.getNewValue();
+        //改变前的数据
+        Object oldValue = evt.getOldValue();
+        //如果改变的时 killNumber 击败了多少坦克
+        if (GameCommonData.killNumberName.equalsIgnoreCase(evtPropertyName)) {
+            //看看是否已经到达要求停止刷新敌方坦克
+            gameListen.stopFlushEnemyTank((int) newValue);
+            //改变菜单面板的数据
+            this.changeLabel(newValue);
+        }
     }
 
     private class MenuDataAbstract extends ViewAbstract {
@@ -98,6 +118,14 @@ public class MenuView extends JFrame {
             panel.add(stopOrBeginButton);
             panel.add(againButton);
             panel.add(exitButton);
+            killLabel = new JLabel("当前已击杀0个坦克");
+            killLabel.setBounds(this.buttonX + (this.buttonDistance * (size++)),
+                    this.buttonY,
+                    this.labelWidth,
+                    this.labelHeight);
+            Font font = new Font("宋体", Font.PLAIN, 30);
+            killLabel.setFont(font);
+            panel.add(killLabel);
             return panel;
         }
     }

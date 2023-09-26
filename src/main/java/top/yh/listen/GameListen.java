@@ -1,8 +1,7 @@
 package top.yh.listen;
 
-import lombok.Getter;
-import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.ViewCommonData;
 import top.yh.utils.Condition;
 
@@ -15,42 +14,33 @@ import java.awt.event.*;
  **/
 public class GameListen {
     /**
-     * 退出按钮的监听器
-     */
-    private static ExitButtonListen exitButtonListen;
-    /**
-     * 暂停和开始按钮的监听器
-     */
-    private static StopOrBeginButtonListen stopOrBeginButtonListen;
-    /**
      * 物体的监听器
      */
     private static SuperListen superListen;
     /**
-     * 是否开启了刷怪定时器
+     * 暂停和开始按钮的监听器
      */
-    private static boolean whetherToStartTheTimer;
+    private StopOrBeginButtonListen stopOrBeginButtonListen;
     /**
-     * 是否初始化
+     * 退出按钮的监听器
      */
-    private static boolean initializeOrNot;
-
+    private ExitButtonListen exitButtonListen;
     /**
      * 游戏窗体的鼠标监听对象
      */
     private GameFrameListen gameFrameMouseListen;
     /**
-     * 游戏窗口按钮的键盘监听对象
-     */
-    private GameFrameListen.KeyListen gameFrameKeyListen;
-    /**
      * 游戏窗体是否已经开始刷新
      */
     private boolean isGameViewRepaint;
-
+    /**
+     * 是否开启了刷怪定时器
+     */
+    private boolean whetherToStartTheTimer;
     public GameListen() {
         //初始化判断对象
-        whetherToStartTheTimer = initializeOrNot = isGameViewRepaint = false;
+        whetherToStartTheTimer =
+                        isGameViewRepaint = false;
         //游戏物体的监听
         superListen = new SuperListen();
     }
@@ -88,7 +78,6 @@ public class GameListen {
             //关闭定时器
             superListen.stopForFlushEnemyTank(value);
         }
-
     }
 
     /**
@@ -106,11 +95,13 @@ public class GameListen {
      *
      * @return 返回监听器对象
      */
-    public GameFrameListen.KeyListen addGameFrameKeyListen() {
-        if (gameFrameKeyListen == null) {
-            gameFrameKeyListen = new GameFrameListen.KeyListen();
-        }
-        return gameFrameKeyListen;
+    public KeyAdapter addGameFrameKeyListen() {
+        return new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                gameFrameMouseListen.beginOrStop(e, false);
+            }
+        };
     }
 
     /**
@@ -142,12 +133,7 @@ public class GameListen {
     /**
      * 还没有开始时预加载
      */
-    public void notStartInitData() {
-        if (!initializeOrNot) {
-            initializeOrNot = true;
-            superListen.notStartInitData();
-        }
-    }
+    public void notStartInitData() {superListen.notStartInitData();}
 
     /**
      * 重绘
@@ -165,18 +151,25 @@ public class GameListen {
         isGameViewRepaint = false;
         superListen.stopForGameRepaint();
         switch (condition) {
-            case NotStarted:
-            case Fail:
-            case Win:
-                exitButtonListen.button.setEnabled(true);
-                break;
-            case Pause:
-            case Begin:
-            default:
-                break;
+            case NotStarted, Fail, Win -> exitButtonListen.button.setEnabled(true);
+            case Pause, Begin,
+                    default -> {
+            }
         }
     }
 
+    /**
+     * 退出键
+     */
+    private record ExitButtonListen(JButton button) implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ViewCommonData.musicPlay.stopMusic();
+            superListen.getAddTimer().stopTimerSet();
+            System.gc();
+            System.exit(0);
+        }
+    }
 
     /**
      * 游戏窗体的监听
@@ -184,16 +177,12 @@ public class GameListen {
      * 按空格键暂停
      * 按任意键开始
      */
-    private static class GameFrameListen extends MouseAdapter {
-        public GameFrameListen() {
-
-        }
-
+    private class GameFrameListen extends MouseAdapter {
         /**
          * @param e          Event对象
          * @param keyOrMouse 如果是键盘就为false 如果是鼠标就为true
          */
-        private static void beginOrStop(InputEvent e, boolean keyOrMouse) {
+        private void beginOrStop(InputEvent e, boolean keyOrMouse) {
             switch (GameCommonData.state) {
                 case Begin:
                     if (keyOrMouse || ((KeyEvent) e).getKeyCode() == KeyEvent.VK_SPACE) {
@@ -230,39 +219,13 @@ public class GameListen {
         public void mouseClicked(MouseEvent e) {
             beginOrStop(e, true);
         }
-
-        public static class KeyListen extends KeyAdapter {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                beginOrStop(e, false);
-            }
-        }
-    }
-
-    /**
-     * 退出键
-     */
-    @Getter
-    private static class ExitButtonListen implements ActionListener {
-        private final JButton button;
-
-        public ExitButtonListen(JButton button) {
-            this.button = button;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ViewCommonData.musicPlay.stopMusic();
-            System.gc();
-            System.exit(0);
-        }
     }
 
     /**
      * 暂停按钮 和 开始按钮监听
      */
 
-    private static class StopOrBeginButtonListen implements ActionListener {
+    private class StopOrBeginButtonListen implements ActionListener {
         private final JButton button;
 
         public StopOrBeginButtonListen(JButton button) {

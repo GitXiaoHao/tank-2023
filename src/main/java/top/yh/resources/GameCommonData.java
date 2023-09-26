@@ -81,5 +81,4 @@ public class GameCommonData {
     private GameCommonData() {
 
     }
-
 }

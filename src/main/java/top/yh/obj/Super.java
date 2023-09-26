@@ -36,24 +36,20 @@ public class Super extends TankAbstract {
         //移动
         switch (getDirection()) {
             //上
-            case UP:
+            case UP ->
                 //y--
-                setY(getY() - getSpeed());
-                break;
+                    setY(getY() - getSpeed());
+
             //下
-            case DOWN:
-                setY(getY() + getSpeed());
-                break;
+            case DOWN -> setY(getY() + getSpeed());
+
             //左
-            case LEFT:
-                setX(getX() - getSpeed());
-                break;
+            case LEFT -> setX(getX() - getSpeed());
+
             //右
-            case RIGHT:
-                setX(getX() + getSpeed());
-                break;
-            default:
-                break;
+            case RIGHT -> setX(getX() + getSpeed());
+            default -> {
+            }
         }
     }
 
@@ -133,7 +129,7 @@ public class Super extends TankAbstract {
                 GameCommonData.uselessList.add(this);
                 GameCommonData.heroBulletList.remove(this);
                 //子弹++
-                System.out.println(GameCommonData.surplusHeroBulletNumber.decrementAndGet() + "子弹");
+                GameCommonData.surplusHeroBulletNumber.decrementAndGet();
             }
 
         }
@@ -164,20 +160,15 @@ public class Super extends TankAbstract {
                     GameCommonData.uselessList.add(data);
                     GameCommonData.uselessList.add(this);
                     GameCommonData.heroBulletList.remove(data);
-                    System.out.println(GameCommonData.enemyTankList.size());
                     GameCommonData.enemyTankList.remove(this);
-                    System.out.println(GameCommonData.enemyTankList.size());
-                    //关掉定时器
-                    System.out.println(this);
                     List<Timer> timerList = GameCommonData.tankDataTimerMap.get(this);
-                    for (int j = 0; j < timerList.size(); j++) {
-                        timerList.get(j).stop();
+                    for (Timer timer : timerList) {
+                        timer.stop();
                     }
                     GameCommonData.tankDataTimerMap.remove(this);
                     //看是不是我方子弹
                     if (data instanceof HeroBullet) {
-                        //子弹++
-                        System.out.println(GameCommonData.surplusHeroBulletNumber.decrementAndGet() + "子弹");
+                        GameCommonData.surplusHeroBulletNumber.decrementAndGet();
                         //消灭敌人的数量++
                         GameCommonData.someListenValue.setKillNumber(GameCommonData.someListenValue.getKillNumber() + 1);
                     }

@@ -222,13 +222,16 @@ public class AccountListen {
                 if (visitedDatabase()) {
                     if (ViewCommonData.gameView == null) {
                         ViewCommonData.gameView = new GameView();
-                        //清空
-                        ViewCommonData.loginWindow = ViewCommonData.registerWindow = null;
                     } else {
                         ViewCommonData.gameView.setVisible(true);
                     }
                     ViewCommonData.loginSuccess = false;
                     ViewCommonData.loginWindow.setVisible(false);
+                    ViewCommonData.loginWindow = null;
+                    if (ViewCommonData.registerWindow != null) {
+                        ViewCommonData.registerWindow.setVisible(false);
+                        ViewCommonData.registerWindow = null;
+                    }
                 }
             }
         }

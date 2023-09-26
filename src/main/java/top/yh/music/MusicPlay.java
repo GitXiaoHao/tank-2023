@@ -12,10 +12,6 @@ public class MusicPlay extends Thread {
     SourceDataLine dataLine = null;
     private String music;
 
-    public static void main(String[] args) {
-        new MusicPlay("top/yh/music//war1.wav").start();
-    }
-
     public MusicPlay(String music) {
         this.music = music;
     }

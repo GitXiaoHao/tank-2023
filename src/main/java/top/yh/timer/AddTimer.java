@@ -1,12 +1,12 @@
 package top.yh.timer;
 
-import top.yh.utils.PropertiesName;
 import top.yh.obj.Super;
-import top.yh.resources.TankAbstract;
 import top.yh.resources.GameCommonData;
+import top.yh.resources.TankAbstract;
 import top.yh.resources.ViewCommonData;
 import top.yh.utils.Direction;
 import top.yh.utils.GetProperties;
+import top.yh.utils.PropertiesName;
 
 import javax.swing.Timer;
 import java.util.*;
@@ -21,7 +21,7 @@ public class AddTimer {
     /**
      * 存放计时器
      */
-    private final Set<Timer> timerSet;
+    private final Set<javax.swing.Timer> timerSet;
     /**
      * 游戏界面重绘
      */
@@ -30,11 +30,6 @@ public class AddTimer {
      * 刷新敌方坦克
      */
     private FlushEnemyTank flushEnemyTank;
-    /**
-     * 敌方每个坦克的子弹刷新
-     */
-    private FlushEnemyTankBullet flushEnemyTankBullet;
-    private FlushEnemyTankInspectAndExchangeDirection flushEnemyTankInspectAndExchangeDirection;
 
     /**
      * 构造方法
@@ -42,7 +37,10 @@ public class AddTimer {
     public AddTimer() {
         timerSet = Collections.synchronizedSet(new HashSet<>());
     }
-
+    public void stopTimerSet(){
+        timerSet.forEach(Timer::stop);
+        timerSet.clear();
+    }
     /**
      * 判断是否出界
      *
@@ -120,10 +118,7 @@ public class AddTimer {
      * 判断是否出界并且换方向
      */
     public void forEnemyTankInspectAndExchangeDirection(TankAbstract enemyTank, int delay) {
-        if (flushEnemyTankInspectAndExchangeDirection == null) {
-            flushEnemyTankInspectAndExchangeDirection = new FlushEnemyTankInspectAndExchangeDirection();
-        }
-        timerSet.add(flushEnemyTankInspectAndExchangeDirection.start(enemyTank, delay));
+        timerSet.add(this.enemyTankInspectAndExchangeDirectionForStart(enemyTank, delay));
     }
 
     /**
@@ -133,39 +128,65 @@ public class AddTimer {
      * @param enemyTankBullet
      */
     public void forEnemyTankBulletStart(TankAbstract tank, TankAbstract enemyTankBullet) {
-        if (this.flushEnemyTankBullet == null) {
-            flushEnemyTankBullet = new FlushEnemyTankBullet();
-        }
-        timerSet.add(this.flushEnemyTankBullet.start(tank, enemyTankBullet));
+        timerSet.add(this.flushEnemyTankBulletStart(tank, enemyTankBullet));
     }
 
     /**
-     * 判断坦克出界和换方向
+     * 判断是否出界并且换方向
+     * @param enemyTank
+     * @param delay
+     * @return
      */
-    private static class FlushEnemyTankInspectAndExchangeDirection {
-        public Timer start(TankAbstract enemyTank, int delay) {
-            //开启定时器
-            //看看越界没 并且更换方向
-            Timer timer = new Timer(delay, (e) -> {
-                boolean outside = false;
-                if (!outside) {
-                    //没有出界
-                    //换方向
-                    //随机产生方向
-                    int nextInt = new Random().nextInt(Direction.values().length);
-                    enemyTank.setDirection(Direction.changeOfString(String.valueOf(nextInt)));
-                    ViewCommonData.gameView.repaint();
-                }
-            });
-            timer.start();
-            //加入定时器
-            List<Timer> list = GameCommonData.tankDataTimerMap.get(enemyTank);
-            list.add(timer);
-            GameCommonData.tankDataTimerMap.put(enemyTank, list);
-            return timer;
-        }
-
+    public Timer enemyTankInspectAndExchangeDirectionForStart(TankAbstract enemyTank, int delay) {
+        //开启定时器
+        //看看越界没 并且更换方向
+        Timer timer = new Timer(delay, (e) -> {
+            boolean outside = false;
+            if (!outside) {
+                //没有出界
+                //换方向
+                //随机产生方向
+                int nextInt = new Random().nextInt(Direction.values().length);
+                enemyTank.setDirection(Direction.changeOfString(String.valueOf(nextInt)));
+                ViewCommonData.gameView.repaint();
+            }
+        });
+        timer.start();
+        //加入定时器
+        List<Timer> list = GameCommonData.tankDataTimerMap.get(enemyTank);
+        list.add(timer);
+        GameCommonData.tankDataTimerMap.put(enemyTank, list);
+        return timer;
     }
+
+    /**
+     * 敌方每个坦克的子弹刷新
+     * @param tank
+     * @param enemyTankBullet
+     * @return
+     */
+    public Timer flushEnemyTankBulletStart(TankAbstract tank, TankAbstract enemyTankBullet) {
+        Timer enemyTankBulletTimer = new Timer(Integer.parseInt(GetProperties.getSpecificData(PropertiesName.ENEMY_TANK_BULLET_PATH, "flushMinus")), e1 -> {
+            if (!outside(tank)) {
+                //判断是否已经出界
+                //没有出界
+                Super.EnemyTankBullet tankBullet = (Super.EnemyTankBullet) enemyTankBullet.clone();
+                tankBullet.setX(tank.getX() + 18);
+                tankBullet.setY(tank.getY() + 15);
+                tankBullet.setDirection(tank.getDirection());
+                GameCommonData.superList.add(tankBullet);
+                GameCommonData.enemyTankBulletList.add(tankBullet);
+            }
+        });
+        enemyTankBulletTimer.start();
+        //加入集合 方便关掉定时器
+        List<Timer> list = Collections.synchronizedList(new ArrayList<>());
+        list.add(enemyTankBulletTimer);
+        GameCommonData.tankDataTimerMap.put(tank, list);
+        return enemyTankBulletTimer;
+    }
+
+
 
     private static class FlushEnemyTank {
         /**
@@ -206,30 +227,6 @@ public class AddTimer {
                 enemyTankTimer.stop();
             }
         }
-    }
-
-    private static class FlushEnemyTankBullet {
-        public Timer start(TankAbstract tank, TankAbstract enemyTankBullet) {
-            Timer enemyTankBulletTimer = new Timer(Integer.parseInt(GetProperties.getSpecificData(PropertiesName.ENEMY_TANK_BULLET_PATH, "flushMinus")), e1 -> {
-                if (!outside(tank)) {
-                    //判断是否已经出界
-                    //没有出界
-                    Super.EnemyTankBullet tankBullet = (Super.EnemyTankBullet) enemyTankBullet.clone();
-                    tankBullet.setX(tank.getX() + 18);
-                    tankBullet.setY(tank.getY() + 15);
-                    tankBullet.setDirection(tank.getDirection());
-                    GameCommonData.superList.add(tankBullet);
-                    GameCommonData.enemyTankBulletList.add(tankBullet);
-                }
-            });
-            enemyTankBulletTimer.start();
-            //加入集合 方便关掉定时器
-            List<Timer> list = Collections.synchronizedList(new ArrayList<>());
-            list.add(enemyTankBulletTimer);
-            GameCommonData.tankDataTimerMap.put(tank, list);
-            return enemyTankBulletTimer;
-        }
-
     }
 
     /**

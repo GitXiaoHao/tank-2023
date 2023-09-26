@@ -22,9 +22,7 @@ public class GetProperties {
     /**
      * 不能进行初始化
      */
-    private GetProperties() {
-
-    }
+    private GetProperties() {}
 
     /**
      * 获取property文件对象

@@ -33,15 +33,13 @@ public enum Direction {
         if (value.matches(regex)) {
             //强转
             int dir = Integer.parseInt(value);
-            switch (dir){
-                case 0:
-                case 1: return UP;
-                case 2: return DOWN;
-                case 3: return LEFT;
-                case 4: return RIGHT;
-                default:
-                    return DEFAULT;
-            }
+            return switch (dir) {
+                case 0, 1 -> UP;
+                case 2 -> DOWN;
+                case 3 -> LEFT;
+                case 4 -> RIGHT;
+                default -> DEFAULT;
+            };
         }
         if (UP.name().equalsIgnoreCase(value)) {
             return UP;

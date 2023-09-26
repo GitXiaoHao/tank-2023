@@ -1,5 +1,6 @@
 package top.yh.listen;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import top.yh.utils.PropertiesName;
 import top.yh.obj.Super;
@@ -21,6 +22,7 @@ public class SuperListen {
     /**
      * 添加计时器
      */
+    @Getter
     private AddTimer addTimer;
     /**
      * 开始时的资源

@@ -1,6 +1,7 @@
 package top.yh.resources;
 
 import lombok.Getter;
+import lombok.Setter;
 import top.yh.utils.GetImage;
 import top.yh.utils.GetProperties;
 
@@ -52,6 +53,20 @@ public abstract class ViewAbstract {
     protected int buttonDistance;
     protected int labelWidth;
     protected int labelHeight;
+    /**
+     * 双缓冲图片
+     */
+    @Setter
+    protected Image image = null;
+    /**
+     * 失败背景图
+     */
+    protected Image failBackGroundImage;
+    protected int flushMinus;
+    /**
+     * 胜利背景图
+     */
+    protected Image winBackGroundImage;
 
     /**
      * 构造方法
